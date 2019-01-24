@@ -42,31 +42,34 @@ RUN apt-get update && \
   rm -rf /var/lib/apt/lists/*
 
 # Install XWiki as the WIKI webapp context in Tomcat
+
+ENV XWIKI_WEBAPP_BASEPATH "/usr/local/tomcat/webapps/wiki"
+
 # Create the Tomcat temporary directory
 # Configure the XWiki permanent directory
 ENV XWIKI_VERSION=10.11
 ENV XWIKI_URL_PREFIX "http://maven.xwiki.org/releases/org/xwiki/platform/xwiki-platform-distribution-war/${XWIKI_VERSION}"
 ENV XWIKI_DOWNLOAD_SHA256 e926bbb7c339d3308c6b11d2c2699a072fc535aeba5c18a30c6f9c10fe395ec7
-RUN rm -rf /usr/local/tomcat/webapps/wiki/* && \
+RUN rm -rf /usr/local/tomcat/webapps/* && \
   mkdir -p /usr/local/tomcat/temp && \
   mkdir -p /usr/local/xwiki/data && \
   curl -fSL "${XWIKI_URL_PREFIX}/xwiki-platform-distribution-war-${XWIKI_VERSION}.war" -o xwiki.war && \
   echo "$XWIKI_DOWNLOAD_SHA256 xwiki.war" | sha256sum -c - && \
-  unzip -d /usr/local/tomcat/webapps/wiki xwiki.war && \
+  unzip -d ${XWIKI_WEBAPP_BASEPATH} xwiki.war && \
   rm -f xwiki.war
 
 # Copy the JDBC driver in the XWiki webapp
-RUN cp /usr/share/java/postgresql-jdbc4.jar /usr/local/tomcat/webapps/wiki/WEB-INF/lib/
+RUN cp /usr/share/java/postgresql-jdbc4.jar ${XWIKI_WEBAPP_BASEPATH}/WEB-INF/lib/
 
 # Configure Tomcat. For example set the memory for the Tomcat JVM since the default value is too small for XWiki
 COPY tomcat/setenv.sh /usr/local/tomcat/bin/
 
 # Setup the XWiki Hibernate configuration
-COPY xwiki/hibernate.cfg.xml /usr/local/tomcat/webapps/wiki/WEB-INF/hibernate.cfg.xml
+COPY xwiki/hibernate.cfg.xml ${XWIKI_WEBAPP_BASEPATH}/WEB-INF/hibernate.cfg.xml
 
 # Set a specific distribution id in XWiki for this docker packaging.
 RUN sed -i 's/<id>org.xwiki.platform:xwiki-platform-distribution-war/<id>org.xwiki.platform:xwiki-platform-distribution-docker/' \
-  /usr/local/tomcat/webapps/wiki/META-INF/extension.xed
+  ${XWIKI_WEBAPP_BASEPATH}/META-INF/extension.xed
 
 # Add scripts required to make changes to XWiki configuration files at execution time
 # Note: we don't run CHMOD since 1) it's not required since the executabe bit is already set in git and 2) running
