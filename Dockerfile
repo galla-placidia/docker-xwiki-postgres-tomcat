@@ -43,7 +43,7 @@ RUN apt-get update && \
 
 # Install XWiki as the WIKI webapp context in Tomcat
 
-ENV XWIKI_WEBAPP_BASEPATH "/usr/local/tomcat/webapps/wiki"
+ENV XWIKI_WEBAPP_BASEPATH "/usr/local/tomcat/webapps/xwiki"
 
 # Create the Tomcat temporary directory
 # Configure the XWiki permanent directory
