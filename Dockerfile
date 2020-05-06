@@ -75,6 +75,7 @@ RUN sed -i 's/<id>org.xwiki.platform:xwiki-platform-distribution-war/<id>org.xwi
 # Note: we don't run CHMOD since 1) it's not required since the executabe bit is already set in git and 2) running
 # CHMOD after a COPY will sometimes fail, depending on different host-specific factors (especially on AUFS).
 COPY xwiki/docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh
 
 # Make the XWiki directory (the permanent directory is included in it) persist on the host (so that it's not recreated
 # across runs)
